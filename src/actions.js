@@ -1,16 +1,21 @@
 import {redirect} from "react-router-dom" //we want redirect user to be redirected to another page once they hit the url with the action
 import url from "./url";
 
-//CreateAction => create a todo from form submission to `/create`
-export async function createAction({request}){
+const generateTodoObject = async(request) => {
     //get the form data
     const formData = await request.formData()
 
     //construct new todo
-    const newTodo = {
+    return {
         subject: formData.get("subject"),
         details: formData.get("details")
     }
+}
+
+//CreateAction => create a todo from form submission to `/create`
+export async function createAction({request}){
+    
+    const newTodo = await generateTodoObject(request)
 
     //send request to create route in the backend
     await fetch(url, {
@@ -27,22 +32,16 @@ export async function createAction({request}){
 
 //updateAction => update a todo from form submissions to `/update/:id`
 export async function updateAction({ request, params }) {
-    // get the form data
-    const formData = await request.formData();
   
-    // construct new todo
-    const newTodo = {
-      subject: formData.get("subject"),
-      details: formData.get("details"),
-    };
-  
+    const updatedTodo = await generateTodoObject(request)
+
     // request to update route in backend
     await fetch(url + params.id + "/", {
       method: "put",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(newTodo),
+      body: JSON.stringify(updatedTodo),
     });
   
     // redirect back to the index page
